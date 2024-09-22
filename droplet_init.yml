@@ -1,0 +1,39 @@
+#cloud-config
+users:
+  - name: lhridley
+    ssh-authorized-keys:
+      - {{ }}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+  - name: ghactions
+    ssh-authorized-keys:
+      - {{ }}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell /bin/bash
+rumcmd:
+  - sudo apt update
+  - sudo apt install apt-transport-https ca-certificates curl software-properties-common
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - sudo apt update
+  - apt-cache policy docker-ce
+  - sudo apt install docker-ce
+  - sudo systemctl status docker
+  - sudo usermod -aG docker lhridley
+  - sudo usermod -aG docker ghactions
+  - sudo systemctl enable docker
+write_files:
+  - path: /etc/ssh/sshd_config
+    content: |
+Include /etc/ssh/sshd_config.d/*.conf
+PermitRootLogin no
+PasswordAuthentication no
+AllowUsers lhridley ghactions
+KbdInteractiveAuthentication no
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem	sftp	/usr/lib/openssh/sftp-server
