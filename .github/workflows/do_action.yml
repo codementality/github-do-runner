@@ -1,0 +1,25 @@
+on: [push, pull_request_target]
+name: Test
+
+jobs:
+#  lint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@master
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@master
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          no_auth: true
+#          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#          version: 1.38.0
+      - name: Verify installation
+        run: doctl version
+#      - name: Verify log-in
+#        run: doctl compute region list
